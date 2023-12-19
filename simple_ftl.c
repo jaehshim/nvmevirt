@@ -91,6 +91,22 @@ bool simple_proc_nvme_io_cmd(struct nvmev_ns *ns, struct nvmev_request *req,
 	case nvme_cmd_flush:
 		ret->nsecs_target = __schedule_flush(req);
 		break;
+	case nvme_cmd_read_and_write: {
+		uint64_t write_target;
+		unsigned long write_lba;
+		unsigned long read_lba;
+		unsigned int length;
+
+		write_lba = cmd->common.cdw10[0];
+		read_lba = cmd->common.cdw10[4];
+		length = (cmd->common.cdw10[2] + 1) << 9;
+
+		write_target = __schedule_io_units(
+			nvme_cmd_write, write_lba, length, __get_wallclock());
+		ret->nsecs_target = __schedule_io_units(
+			nvme_cmd_read, read_lba, length, write_target);
+		break;
+	}
 	default:
 		NVMEV_ERROR("%s: command not implemented: %s (0x%x)\n", __func__,
 			    nvme_opcode_string(cmd->common.opcode), cmd->common.opcode);

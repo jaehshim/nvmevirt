@@ -46,10 +46,20 @@ static unsigned int __do_perform_io(int sqid, int sq_entry)
 	u64 paddr;
 	u64 *paddr_list = NULL;
 	size_t nsid = cmd->nsid - 1; // 0-based
+	size_t read_offset;
 
-	offset = cmd->slba << 9;
-	length = (cmd->length + 1) << 9;
-	remaining = length;
+	if (cmd->opcode == nvme_cmd_read_and_write) {
+		struct nvme_common_command *common = &sq_entry(sq_entry).common;
+		offset = common->cdw10[0] << 9;
+		read_offset = common->cdw10[4] << 9;
+		length = (common->cdw10[2] + 1) << 9;
+		remaining = length;
+		NVMEV_INFO("Write offset: %ld, read offset: %ld, length: %ld\n", offset, read_offset, length);
+	} else {
+		offset = cmd->slba << 9;
+		length = (cmd->length + 1) << 9;
+		remaining = length;
+	}
 
 	while (remaining) {
 		size_t io_size;
@@ -85,6 +95,12 @@ static unsigned int __do_perform_io(int sqid, int sq_entry)
 			memcpy(nvmev_vdev->ns[nsid].mapped + offset, vaddr + mem_offs, io_size);
 		} else if (cmd->opcode == nvme_cmd_read) {
 			memcpy(vaddr + mem_offs, nvmev_vdev->ns[nsid].mapped + offset, io_size);
+		} else if (cmd->opcode == nvme_cmd_read_and_write) {
+			/* perform write first */
+			memcpy(nvmev_vdev->ns[nsid].mapped + offset, vaddr + mem_offs, io_size);
+			/* then, perform read */
+			memcpy(vaddr + mem_offs, nvmev_vdev->ns[nsid].mapped + read_offset, io_size);
+			read_offset += io_size;
 		}
 
 		kunmap_atomic(vaddr);
