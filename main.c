@@ -424,7 +424,7 @@ static void NVMEV_STORAGE_INIT(struct nvmev_dev *nvmev_vdev)
 	if (nvmev_vdev->storage_mapped == NULL)
 		NVMEV_ERROR("Failed to map storage memory.\n");
 
-	nvmev_vdev->proc_root = proc_mkdir("nvmev", NULL);
+	nvmev_vdev->proc_root = proc_mkdir(nvmev_vdev->virt_name, NULL);
 	nvmev_vdev->proc_read_times =
 		proc_create("read_times", 0664, nvmev_vdev->proc_root, &proc_file_fops);
 	nvmev_vdev->proc_write_times =
@@ -443,7 +443,7 @@ static void NVMEV_STORAGE_FINAL(struct nvmev_dev *nvmev_vdev)
 	remove_proc_entry("stat", nvmev_vdev->proc_root);
 	remove_proc_entry("debug", nvmev_vdev->proc_root);
 
-	remove_proc_entry("nvmev", NULL);
+	remove_proc_entry(nvmev_vdev->virt_name, NULL);
 
 	if (nvmev_vdev->storage_mapped)
 		memunmap(nvmev_vdev->storage_mapped);
@@ -603,7 +603,7 @@ static int NVMeV_init(void)
 	NVMEV_NAMESPACE_INIT(nvmev_vdev);
 
 	if (io_using_dma) {
-		if (ioat_dma_chan_set("dma7chan0") != 0) {
+		if (ioat_dma_chan_set(nvmev_vdev->dma_name) != 0) {
 			io_using_dma = false;
 			NVMEV_ERROR("Cannot use DMA engine, Fall back to memcpy\n");
 		}

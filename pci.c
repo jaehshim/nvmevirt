@@ -439,6 +439,9 @@ struct nvmev_dev *VDEV_INIT(void)
 
 	nvmev_vdev->admin_q = NULL;
 
+	snprintf(nvmev_vdev->virt_name, sizeof(nvmev_vdev->virt_name), "nvmev%d", VIRT_ID);
+	snprintf(nvmev_vdev->dma_name, sizeof(nvmev_vdev->dma_name), "dma%dchan0", VIRT_ID);
+
 	return nvmev_vdev;
 }
 

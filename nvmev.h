@@ -246,6 +246,9 @@ struct nvmev_dev {
 	struct proc_dir_entry *proc_debug;
 
 	unsigned long long *io_unit_stat;
+
+	char virt_name[10];
+	char dma_name[20];
 };
 
 struct nvmev_request {
