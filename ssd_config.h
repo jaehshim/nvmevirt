@@ -176,12 +176,12 @@ static_assert((ZONE_SIZE % DIES_PER_ZONE) == 0);
 #define LBA_SIZE (1 << LBA_BITS)
 
 #elif (BASE_SSD == WD_ZN540)
-#define NR_NAMESPACES 1
+#define NR_NAMESPACES 2
 
-#define NS_SSD_TYPE_0 SSD_TYPE_ZNS
-#define NS_CAPACITY_0 (0)
-#define NS_SSD_TYPE_1 NS_SSD_TYPE_0
-#define NS_CAPACITY_1 (0)
+#define NS_SSD_TYPE_0 SSD_TYPE_CONV
+#define NS_CAPACITY_0 (4294967296)
+#define NS_SSD_TYPE_1 SSD_TYPE_ZNS
+#define NS_CAPACITY_1 (4294967296)
 #define MDTS (6)
 #define CELL_MODE (CELL_MODE_TLC)
 
