@@ -385,6 +385,10 @@ void conv_init_namespace(struct nvmev_ns *ns, uint32_t id, uint64_t size, void *
 	ssd_init_params(&spp, size, nr_parts);
 	conv_init_params(&cpp);
 
+	if (spp.write_buffer_size == 0) {
+		spp.write_buffer_size = NAND_CHANNELS * LUNS_PER_NAND_CH * ONESHOT_PAGE_SIZE * 2;
+	}
+
 	conv_ftls = kmalloc(sizeof(struct conv_ftl) * nr_parts, GFP_KERNEL);
 
 	for (i = 0; i < nr_parts; i++) {
